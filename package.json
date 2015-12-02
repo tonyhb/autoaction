@@ -1,0 +1,30 @@
+{
+  "name": "autoaction",
+  "version": "0.0.1",
+  "description": "Declarative data loading for redux + react",
+  "main": "autoaction.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/tonyhb/autoaction.git"
+  },
+  "keywords": [
+    "autoaction",
+    "react",
+    "redux",
+    "data",
+    "loading"
+  ],
+  "author": "Tony Holdstock-Brown",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tonyhb/autoaction/issues"
+  },
+  "homepage": "https://github.com/tonyhb/autoaction#readme",
+  "peerDependencies": {
+    "react": "^0.14.3",
+	"react-redux": "^4.0.0"
+  }
+}
