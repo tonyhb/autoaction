@@ -2,6 +2,25 @@
 
 Automatically call redux actions from state.
 
+### Basic example
+
+Action:
+
+```js
+// Note that this function accepts an object and immediately destructures into
+// arguments. It is called via getPostBySlug({ slug: 'some-post' });
+export function getPostBySlug({ slug }) {
+  return {
+    type: "GET_POST",
+    meta: {
+      promise: Axios.get(`/api/posts/${slug}`)
+    }
+  };
+}
+```
+
+Component:
+
 ```js
 import autoaction from 'autoaction';
 import * as postActions from 'actions/posts';
