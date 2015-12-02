@@ -96,7 +96,6 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
 
       componentDidMount() {
         this.trySubscribe();
-        this.tryCreators();
       }
 
       componentWillUnmount() {
