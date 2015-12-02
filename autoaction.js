@@ -6,6 +6,54 @@ import React, { PropTypes } from 'react';
 import deepEqual from 'deep-equal';
 import { bindActionCreators } from 'redux';
 
+const BatchActions = {
+  isDispatching: false,
+
+  // Needs:
+  //   - action name
+  //   - arguments
+  //   - function wrapped with dispatcher
+
+  // object in the format of:
+  //   {
+  //     actionName: [
+  //       {args, func},
+  //       {args, func},
+  //     ],
+  //   }
+  queue: {
+  },
+
+  called: {},
+
+  tryDispatch() {
+    Object.keys(this.queue).forEach( actionName => {
+      let calls = this.queue[actionName];
+
+      calls = calls.reduce((uniq, call) => {
+        if (uniq.every(el => !deepEqual(el.args, call.args))) {
+          uniq.push(call);
+        }
+        return uniq;
+      }, []);
+
+      // Call each action
+      calls.forEach(call => { call.func(call.args); });
+    });
+
+    this.queue = {};
+  },
+
+  enqueue(actionName, args, func) {
+    let actions = this.queue[actionName] || [];
+    actions.push({
+      args,
+      func
+    });
+    this.queue[actionName] = actions;
+  }
+};
+
 /**
  * autoaction is an ES7 decorator which wraps a component with declarative
  * action calls.
@@ -49,11 +97,9 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
 
   // Given a redux store and a list of actions to state maps, compute all
   // arguments for each action.
-  function computeAllActionArgs(store) {
-    const state = store.getState();
-
+  function computeAllActionArgs(props, state) {
     return actionNames.reduce((computed, action) => {
-      computed[action] = autoActions[action](state);
+      computed[action] = autoActions[action](props, state);
       return computed;
     }, {});
   }
@@ -86,7 +132,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
         super(props, context);
 
         this.store = context.store;
-        this.mappedActions = computeAllActionArgs(this.store);
+        this.mappedActions = computeAllActionArgs(props, this.store.getState());
         this.actionCreators = bindActionCreators(actionCreators, this.store.dispatch)
       }
 
@@ -96,6 +142,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
 
       componentDidMount() {
         this.trySubscribe();
+        BatchActions.tryDispatch();
       }
 
       componentWillUnmount() {
@@ -116,7 +163,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
       }
 
       handleStoreChange() {
-        const actions = computeAllActionArgs(this.store);
+        const actions = computeAllActionArgs(this.props, this.store.getState());
         if (deepEqual(actions, this.mappedActions)) {
           return;
         }
@@ -145,7 +192,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
 
           if (initialActions || !deepEqual(actionArgs, this.mappedActions[a])) {
             this.mappedActions[a] = actionArgs;
-            this.actionCreators[a](actionArgs);
+            BatchActions.enqueue(a, actionArgs, this.actionCreators[a]);
           }
         });
       }
