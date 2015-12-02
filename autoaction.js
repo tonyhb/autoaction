@@ -144,6 +144,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
           }
 
           if (initialActions || !deepEqual(actionArgs, this.mappedActions[a])) {
+            this.mappedActions[a] = actionArgs;
             this.actionCreators[a](actionArgs);
           }
         });
