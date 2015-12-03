@@ -26,21 +26,30 @@ const BatchActions = {
 
   called: {},
 
+  // tryDispatch iterates through all queued actions and dispatches actions
+  // with unique arguments.
+  //
+  // Each dispatch changes store state; our wrapper component listens to store
+  // changes and queues/dispatches more actions.  This means that we need to
+  // remove actions from our queue just before they're dispatched to prevent
+  // stack overflows.
   tryDispatch() {
     Object.keys(this.queue).forEach( actionName => {
       let calls = this.queue[actionName];
 
       // Iterate through all of this action's batched calls and dedupe
       // if arguments are the same
-      calls = calls.reduce((uniq, call) => {
+      calls = calls.reduce((uniq, call, idx) => {
         if (uniq.every(el => !deepEqual(el.args, call.args))) {
           uniq.push(call);
         }
+        // Remove this from our queue.
+        this.queue[actionName].splice(idx, 1);
         return uniq;
       }, []);
 
       // call each deduped action and pass in the required args
-      calls.forEach(call => {
+      calls.forEach((call, idx) => {
         if (Array.isArray(call.args)) {
           return call.func.apply(null, call.args);
         }
