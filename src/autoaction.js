@@ -35,7 +35,7 @@ const BatchActions = {
   // stack overflows.
   tryDispatch() {
     Object.keys(this.queue).forEach( actionName => {
-      let calls = this.queue[actionName];
+      let calls = this.queue[actionName] || [];
 
       // Iterate through all of this action's batched calls and dedupe
       // if arguments are the same
