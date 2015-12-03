@@ -1,3 +1,7 @@
+# v0.0.4
+
+- Prevent stack overflows when listening to props with undefined arguments
+
 # v0.0.3
 
 - Call actions using `.apply` if we have an array of arguments
