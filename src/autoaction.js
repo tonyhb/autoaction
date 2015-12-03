@@ -1,4 +1,4 @@
-/*eslint-disable */
+'use strict';
 
 // import storeShape from 'react-redux/lib/utils/storeShape';
 import shallowEqual from 'react-redux/lib/utils/shallowEqual';
@@ -30,6 +30,8 @@ const BatchActions = {
     Object.keys(this.queue).forEach( actionName => {
       let calls = this.queue[actionName];
 
+      // Iterate through all of this action's batched calls and dedupe
+      // if arguments are the same
       calls = calls.reduce((uniq, call) => {
         if (uniq.every(el => !deepEqual(el.args, call.args))) {
           uniq.push(call);
@@ -169,6 +171,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
         }
 
         this.tryCreators(actions);
+        BatchActions.tryDispatch();
       }
 
       // Iterate through all actions with their computed arguments and call them
@@ -180,7 +183,6 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
         // If we're calling tryCreators with this.mappedActions we've never
         // called the actions before.
         const initialActions = (actions === this.mappedActions);
-
 
         Object.keys(actions).forEach(a => {
           let actionArgs = actions[a];
