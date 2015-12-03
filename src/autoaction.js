@@ -39,8 +39,14 @@ const BatchActions = {
         return uniq;
       }, []);
 
-      // Call each action
-      calls.forEach(call => { call.func(call.args); });
+      // call each deduped action and pass in the required args
+      calls.forEach(call => {
+        if (Array.isArray(call.args)) {
+          return call.func.apply(null, call.args);
+        }
+        // this is either an object or single argument; call as expected
+        return call.func(call.args);
+      });
     });
 
     this.queue = {};
@@ -108,8 +114,19 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
 
   // If any argument within any action call is undefined our arguments should be
   // considered invalid and this should return true.
-  function areActionArgsInvalid(action) {
-    return Object.keys(action).some(arg => action[arg] === undefined);
+  function areActionArgsInvalid(args) {
+    // single argument actions
+    if (args === undefined) {
+      return true;
+    }
+    if (Array.isArray(args)) {
+      return args.some(arg => arg === undefined);
+    }
+    if (typeof args === 'object') {
+      return Object.keys(args).some(arg => args[arg] === undefined);
+    }
+    // TODO: throw an invariant here
+    return false;
   }
 
   return (WrappedComponent) => {
