@@ -17,8 +17,8 @@ const BatchActions = {
   // object in the format of:
   //   {
   //     actionName: [
-  //       {args, func},
-  //       {args, func},
+  //       {func, args, key},
+  //       {func, args, key},
   //     ],
   //   }
   queue: {
@@ -40,7 +40,8 @@ const BatchActions = {
       // Iterate through all of this action's batched calls and dedupe
       // if arguments are the same
       calls = calls.reduce((uniq, call, idx) => {
-        if (uniq.every(el => !deepEqual(el.args, call.args))) {
+        // if the args and key arent the same this is a new unique call
+        if (uniq.every(el => (!deepEqual(el.args, call.args) && el.key !== call.key))) {
           uniq.push(call);
         }
         // Remove this from our queue.
@@ -61,11 +62,12 @@ const BatchActions = {
     this.queue = {};
   },
 
-  enqueue(actionName, args, func) {
+  enqueue(actionName, func, args, key) {
     let actions = this.queue[actionName] || [];
     actions.push({
       args,
-      func
+      func,
+      key
     });
     this.queue[actionName] = actions;
   }
@@ -113,10 +115,28 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
     actionNames.some(k => typeof autoActions[k] === 'function');
 
   // Given a redux store and a list of actions to state maps, compute all
-  // arguments for each action.
-  function computeAllActionArgs(props, state) {
+  // arguments for each action using autoActions passed into the decorator and
+  // return a map contianing the action args and any keys for invalidation.
+  function computeAllActions(props, state) {
     return actionNames.reduce((computed, action) => {
-      computed[action] = autoActions[action](props, state);
+      // we may have an arg function or an object containing arg and key
+      // functions.
+      switch (typeof autoActions[action]) {
+        case 'function': 
+          computed[action] = {
+            args: autoActions[action](props, state),
+            key: null
+          };
+          break;
+        case 'object':
+          computed[action] = {
+            args: autoActions[action].args(props, state),
+            key: autoActions[action].key(props, state)
+          };
+          break;
+        default:
+          // TODO: invariant
+      }
       return computed;
     }, {});
   }
@@ -160,7 +180,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
         super(props, context);
 
         this.store = context.store;
-        this.mappedActions = computeAllActionArgs(props, this.store.getState());
+        this.mappedActions = computeAllActions(props, this.store.getState());
         this.actionCreators = bindActionCreators(actionCreators, this.store.dispatch)
       }
 
@@ -191,7 +211,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
       }
 
       handleStoreChange() {
-        const actions = computeAllActionArgs(this.props, this.store.getState());
+        const actions = computeAllActions(this.props, this.store.getState());
         if (deepEqual(actions, this.mappedActions)) {
           return;
         }
@@ -211,16 +231,16 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
         const initialActions = (actions === this.mappedActions);
 
         Object.keys(actions).forEach(a => {
-          let actionArgs = actions[a];
+          let action = actions[a];
 
-          if (areActionArgsInvalid(actionArgs)) {
+          if (areActionArgsInvalid(action.args)) {
             // TODO: LOG
             return;
           }
 
-          if (initialActions || !deepEqual(actionArgs, this.mappedActions[a])) {
-            this.mappedActions[a] = actionArgs;
-            BatchActions.enqueue(a, actionArgs, this.actionCreators[a]);
+          if (initialActions || !deepEqual(action, this.mappedActions[a])) {
+            this.mappedActions[a] = action;
+            BatchActions.enqueue(a, this.actionCreators[a], action.args, action.key);
           }
         });
       }

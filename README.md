@@ -47,6 +47,17 @@ Examples:
     };
   }
 }, postActions)
+
+// Call an action each time a state/prop value changes but **isn't an action
+// argument**
+@autoaction({
+  // postActions.resetUI will be called with 'post' as the argument each time
+  // the 'key' updates (ie. state.router.params.slug changes)
+  resetUI: {
+    args: 'post',
+    key: (params, state) => state.router.params.slug
+  },
+}, postActions)
 ```
 
 **And exactly how?**
@@ -58,6 +69,9 @@ allowing all components to request the same actions if need be.
 
 When we receive new props we enqueue actions and dispatch immediately. To
 prevent stack overflows we delete actions from the queue before dispatching.
+
+### API
+
 
 
 ### Basic example
