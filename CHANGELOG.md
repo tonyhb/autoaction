@@ -1,3 +1,6 @@
+# v0.0.7
+- Fix issue calling action with array of args
+
 # v0.0.6
 - New API for calling actions with changed state/params props that aren't
   arguments

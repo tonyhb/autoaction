@@ -120,6 +120,15 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
   function computeAllActions(props, state) {
     return actionNames.reduce((computed, action) => {
       const data = autoActions[action];
+
+      if (Array.isArray(data)) {
+        computed[action] = {
+          args: data,
+          key: null
+        };
+        return computed;
+      }
+
       // we may have an arg function or an object containing arg and key
       // functions.
       switch (typeof data) {
