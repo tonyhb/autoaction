@@ -119,23 +119,35 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
   // return a map contianing the action args and any keys for invalidation.
   function computeAllActions(props, state) {
     return actionNames.reduce((computed, action) => {
+      const data = autoActions[action];
       // we may have an arg function or an object containing arg and key
       // functions.
-      switch (typeof autoActions[action]) {
+      switch (typeof data) {
         case 'function': 
           computed[action] = {
-            args: autoActions[action](props, state),
+            args: data(props, state),
             key: null
           };
           break;
         case 'object':
+        let args = data.args
+          // If we're passed a function which calcs args based on props/state,
+          // call it. Otherwise assume that data.args is a single type to be
+          // used as the argument itsekf
+          if (typeof data === 'function') {
+            args = args(props, state);
+          }
           computed[action] = {
-            args: autoActions[action].args(props, state),
-            key: autoActions[action].key(props, state)
+            args,
+            key: data.key(props, state)
           };
           break;
         default:
-          // TODO: invariant
+          // By default use this as the argument
+          computed[action] = {
+            args: data,
+            key: null
+          };
       }
       return computed;
     }, {});
