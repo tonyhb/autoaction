@@ -1,3 +1,8 @@
+# v0.0.6
+- New API for calling actions with changed state/params props that aren't
+  arguments
+- Allow single arbitrary types as arguments to actions
+
 # v0.0.5
 
 - Fix bug when deleting items from a queue rendering calls as undefined
