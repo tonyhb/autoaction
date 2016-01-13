@@ -231,14 +231,44 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
         }
       }
 
+      // When the Redux store recevies new state this is called immediately (via
+      // trySubscribe).
+      //
+      // Each action called via autoaction can use props to determine arguments
+      // for the action.
+      //
+      // Unfortunately, we're listening to the store directly.  This means that
+      // `handleStoreChange` may be called before any parent components receive
+      // new props and pass new props to our autoaction component.  That is
+      // - the parent component hasn't yet received the store update event and
+      // the passed props are out-of-sync with actual store state (they're
+      // stale).
+      //
+      // By computing actions within a requestAnimationFrame window we can
+      // guarantee that components have been repainted and any parent @connect
+      // calls have received new props.  This means that our props used as
+      // arguments within autoconnect will always be in sync with store state.
+      //
+      // This is kinda complex.  Trust us, this works.
+      //
+      // TODO: Write test case.
       handleStoreChange() {
-        const actions = computeAllActions(this.props, this.store.getState());
-        if (deepEqual(actions, this.mappedActions)) {
-          return;
-        }
+        const handleChange = () => {
+          const actions = computeAllActions(this.props, this.store.getState());
+          if (deepEqual(actions, this.mappedActions)) {
+            return;
+          }
 
-        this.tryCreators(actions);
-        BatchActions.tryDispatch();
+          this.tryCreators(actions);
+          BatchActions.tryDispatch();
+        };
+
+        // See above comments for explanation on using RAF.
+        if (window && window.requestAnimationFrame) {
+          window.requestAnimationFrame(handleChange);
+        } else {
+          handleChange();
+        }
       }
 
       // Iterate through all actions with their computed arguments and call them
