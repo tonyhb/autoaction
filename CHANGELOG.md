@@ -1,3 +1,6 @@
+# v0.0.8
+- Fix issue with outdated props from parent @connect
+
 # v0.0.7
 - Fix issue calling action with array of args
 
