@@ -41,9 +41,21 @@ const BatchActions = {
       // if arguments are the same
       calls = calls.reduce((uniq, call, idx) => {
         // if the args and key arent the same this is a new unique call
-        if (uniq.every(el => (!deepEqual(el.args, call.args) && el.key !== call.key))) {
+        const isUnique = uniq.every(prev => {
+          // Only test keys if the current call has a key and it doesn't match
+          // the previous key.
+          const isKeyMatch = (call.key !== null && prev.key === call.key);
+          const isArgMatch = deepEqual(prev.args, call.args);
+
+          // If both the action args and keys match this is non-unique, so
+          // return false.
+          return !(isKeyMatch === true && isArgMatch === true);
+        });
+
+        if (isUnique) {
           uniq.push(call);
         }
+
         // Remove this from our queue.
         this.queue[actionName].splice(idx, 1);
         return uniq;
