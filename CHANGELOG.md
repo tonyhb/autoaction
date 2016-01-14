@@ -1,3 +1,6 @@
+# v0.0.9
+- Fix issue with batching without expliticly stating `key` parameter of actions
+
 # v0.0.8
 - Fix issue with outdated props from parent @connect
 
