@@ -57,7 +57,7 @@ const BatchActions = {
         }
 
         // Remove this from our queue.
-        this.queue[actionName].splice(idx, 1);
+        this.queue[actionName].splice(0, 1);
         return uniq;
       }, []);
 
