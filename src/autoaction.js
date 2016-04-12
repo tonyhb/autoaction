@@ -56,10 +56,10 @@ const BatchActions = {
           uniq.push(call);
         }
 
-        // Remove this from our queue.
-        this.queue[actionName].splice(0, 1);
         return uniq;
       }, []);
+
+      delete this.queue[actionName];
 
       // call each deduped action and pass in the required args
       calls.forEach((call, idx) => {
