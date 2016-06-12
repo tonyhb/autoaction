@@ -43,5 +43,8 @@
     "react-addons-test-utils": "^0.14.3",
     "react-dom": "^0.14.3",
     "sinon": "^1.17.4"
+  },
+  "dependencies": {
+    "deep-equal": "^1.0.1"
   }
 }
