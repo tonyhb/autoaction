@@ -154,7 +154,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
           // If we're passed a function which calcs args based on props/state,
           // call it. Otherwise assume that data.args is a single type to be
           // used as the argument itsekf
-          if (typeof data === 'function') {
+          if (typeof args === 'function') {
             args = args(props, state);
           }
           computed[action] = {

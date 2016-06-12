@@ -137,4 +137,48 @@ describe('Autoaction', () => {
             done();
         }, 50);
     });
+
+    it("Should call the action creator when passing in the autoActions as object\
+        with args as a plain data and a key", (done) => {
+        const loadSpy = sinon.spy((arg) => ({ type: 'test', payload: arg }));
+        const actionCreators = {
+            load: loadSpy
+        };
+        const autoActions = {
+            load: {
+                args: "xyz",
+                key: (state, props) => "xyz"
+            }
+        };
+        const decorator = autoaction(autoActions, actionCreators);
+        const Wrapper = decorator(FirstTestComponent);
+        TestUtils.renderIntoDocument(wrapInProvider(Wrapper));
+        setTimeout(() => {
+            assert.isTrue(loadSpy.callCount === 1);
+            assert.isTrue(loadSpy.getCall(0).args[0] === "xyz");
+            done();
+        }, 50);
+    });
+
+    it("Should call the action creator when passing in the autoActions as object\
+        with args as a function of props & state and a key", (done) => {
+        const loadSpy = sinon.spy((arg) => ({ type: 'test', payload: arg }));
+        const actionCreators = {
+            load: loadSpy
+        };
+        const autoActions = {
+            load: {
+                args: (state, props) => "xyz",
+                key: (state, props) => "xyz"
+            }
+        };
+        const decorator = autoaction(autoActions, actionCreators);
+        const Wrapper = decorator(FirstTestComponent);
+        TestUtils.renderIntoDocument(wrapInProvider(Wrapper));
+        setTimeout(() => {
+            assert.isTrue(loadSpy.callCount === 1);
+            assert.isTrue(loadSpy.getCall(0).args[0] === "xyz");
+            done();
+        }, 50);
+    });
 });
