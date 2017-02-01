@@ -119,7 +119,6 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
 
   // We refer to this many times throughout this function
   const actionNames = Object.keys(autoActions);
-
   // If we're calling actions which have no functions to prepare arguments we
   // don't need to subscribe to store changes, as there is nothing from the
   // store that we need to process.
@@ -144,7 +143,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
       // we may have an arg function or an object containing arg and key
       // functions.
       switch (typeof data) {
-        case 'function': 
+        case 'function':
           computed[action] = {
             args: data(props, state),
             key: null
@@ -155,7 +154,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
           // If we're passed a function which calcs args based on props/state,
           // call it. Otherwise assume that data.args is a single type to be
           // used as the argument itsekf
-          if (typeof data === 'function') {
+          if (typeof args === 'function') {
             args = args(props, state);
           }
           computed[action] = {
