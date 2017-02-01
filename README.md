@@ -1,4 +1,10 @@
-# AutoAction makes data loading declarative
+## AutoAction automatically calls redux actions on mount and prop changes
+
+----
+
+**For data loading this is deprecated in favour of: https://github.com/tonyhb/tectonic**
+
+----
 
 Automatically call redux actions from state.
 
