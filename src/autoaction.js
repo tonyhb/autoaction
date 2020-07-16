@@ -2,9 +2,10 @@
 
 // import storeShape from 'react-redux/lib/utils/storeShape';
 import shallowEqual from 'react-redux/lib/utils/shallowEqual';
-import React, { PropTypes } from 'react';
+import React from 'react';
 import deepEqual from 'deep-equal';
 import { bindActionCreators } from 'redux';
+import PropTypes from 'prop-types';
 
 const BatchActions = {
   isDispatching: false,
@@ -206,7 +207,7 @@ export default function autoaction(autoActions = {}, actionCreators = {}) {
     return class autoaction extends React.Component {
 
       static contextTypes = {
-        store: React.PropTypes.any
+        store: PropTypes.any
       }
 
       constructor(props, context) {
